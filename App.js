@@ -42,17 +42,17 @@ function Login({ navigation }) {
       />
 
       <TouchableOpacity
-        style={styles.button}
+        style={[styles.button, styles.Botao1]}
         onPress={() => navigation.navigate('Home')}
       >
-        <Text style={styles.buttonText}>Logar</Text>
+        <Text style={styles.buttonText}>Entrar</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={[styles.button, { backgroundColor: '#10b981' }]}
+        style={[styles.button, styles.Botao2]}
         onPress={() => navigation.navigate('Cadastro')}
       >
-        <Text style={styles.buttonText}>Cadastre-se</Text>
+        <Text style={styles.buttonText}>Criar Conta</Text>
       </TouchableOpacity>
 
       <StatusBar style="auto" />
@@ -62,26 +62,43 @@ function Login({ navigation }) {
 
 function Cadastro({ navigation }) {
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.label}>Nome</Text>
-      <TextInput style={styles.input} placeholder="Seu nome" />
+    <SafeAreaView style={{ flex: 1 }}>
 
-      <Text style={styles.label}>Email</Text>
-      <TextInput style={styles.input} placeholder="Seu email" />
+      {/* HEADER */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <FontAwesome name="arrow-left" size={22} color="#fff" />
+        </TouchableOpacity>
 
-      <Text style={styles.label}>Senha</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Sua senha"
-        secureTextEntry
-      />
+        <Text style={styles.headerText}>Cadastro</Text>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate('Login')}
-      >
-        <Text style={styles.buttonText}>Cadastrar</Text>
-      </TouchableOpacity>
+        <View style={{ width: 22 }} />
+      </View>
+
+      {/* CONTEÚDO */}
+      <View style={styles.container}>
+        <Text style={styles.label}>Nome</Text>
+        <TextInput style={styles.input} />
+
+        <Text style={styles.label}>CPF</Text>
+        <TextInput style={styles.input} />
+
+        <Text style={styles.label}>Email</Text>
+        <TextInput style={styles.input} />
+
+        <Text style={styles.label}>Senha</Text>
+        <TextInput
+          style={styles.input}
+          secureTextEntry
+        />
+
+        <TouchableOpacity
+          style={[styles.button, styles.Botao1]}
+        >
+          <Text style={styles.buttonText}>Salvar</Text>
+        </TouchableOpacity>
+      </View>
+
     </SafeAreaView>
   );
 }
@@ -104,10 +121,11 @@ function Contatos() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      {/* HEADER */}
       <View style={styles.header}>
         <Text style={styles.headerText}>Lista de Contatos</Text>
-        <FontAwesome name="plus" size={20} color="#fff" />
+        <TouchableOpacity onPress={() => navigation.navigate('Cadastro')}>
+          <FontAwesome name="plus" size={22} color="#fff" />
+        </TouchableOpacity>
       </View>
 
       <ScrollView>
@@ -123,7 +141,6 @@ function Contatos() {
                 <Text style={styles.contactPhone}>{user.phone}</Text>
               </View>
 
-              <FontAwesome name="chevron-right" size={18} color="#6b7280" />
             </View>
           </View>
         ))}
@@ -136,17 +153,21 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="Login">
+        <Stack.Navigator
+          initialRouteName="Login"
+          screenOptions={{ headerShown: false }}
+        >
           <Stack.Screen
             name="Login"
             component={Login}
-            options={{ headerShown: false }}
           />
-          <Stack.Screen name="Cadastro" component={Cadastro} />
+          <Stack.Screen
+            name="Cadastro"
+            component={Cadastro}
+          />
           <Stack.Screen
             name="Home"
             component={Contatos}
-            options={{ headerShown: false }}
           />
         </Stack.Navigator>
       </NavigationContainer>
@@ -245,5 +266,32 @@ const styles = StyleSheet.create({
 
   contactPhone: {
     color: '#6b7280',
+  },
+  button: {
+    width: 220,
+    height: 45,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
+  },
+
+  Botao1: {
+    backgroundColor: '#3b82f6',
+  },
+
+  Botao2: {
+    backgroundColor: '#b91010',
+  },
+
+  buttonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  botaoVoltar: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
   },
 });
