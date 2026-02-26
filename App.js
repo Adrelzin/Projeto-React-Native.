@@ -22,7 +22,7 @@ function Login({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <FontAwesome name="user-circle" size={80} color="#3b82f6" />
+      <FontAwesome name="user-circle" size={80} color="#fcfdfd" />
 
       <Text style={styles.label}>Email</Text>
       <TextInput
@@ -64,10 +64,9 @@ function Cadastro({ navigation }) {
   return (
     <SafeAreaView style={{ flex: 1 }}>
 
-      {/* HEADER */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <FontAwesome name="arrow-left" size={22} color="#fff" />
+          <FontAwesome name="arrow-left" size={22} color="#ff7ebf" />
         </TouchableOpacity>
 
         <Text style={styles.headerText}>Cadastro</Text>
@@ -75,7 +74,6 @@ function Cadastro({ navigation }) {
         <View style={{ width: 22 }} />
       </View>
 
-      {/* CONTEÚDO */}
       <View style={styles.container}>
         <Text style={styles.label}>Nome</Text>
         <TextInput style={styles.input} />
@@ -103,19 +101,22 @@ function Cadastro({ navigation }) {
   );
 }
 
-function Contatos() {
+function Contatos({ navigation }) {
   const users = [
     {
-      name: 'Marcos Andrade',
+      name: 'Estéfanas Argentina',
       phone: '81 98855-3424',
+      email: 'estarg@gmail.com'
     },
     {
-      name: 'Patrícia Tavares',
+      name: 'Adryell Willian',
       phone: '81 99876-5332',
+      email: 'adwl@gmail.com'
     },
     {
-      name: 'Rodrigo Antunes',
+      name: 'Nilson Cardoso',
       phone: '81 98776-5525',
+      email: 'nilcar@gmail.com'
     },
   ];
 
@@ -123,28 +124,123 @@ function Contatos() {
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.header}>
         <Text style={styles.headerText}>Lista de Contatos</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Cadastro')}>
-          <FontAwesome name="plus" size={22} color="#fff" />
+        <TouchableOpacity onPress={() => navigation.navigate('CadContato')}>
+          <FontAwesome name="plus" size={22} color="#ee86b7" />
+        </TouchableOpacity>
+      </View>
+      <ScrollView>
+        {users.map((user, index) => (
+          <TouchableOpacity
+            key={index}
+            onPress={() => navigation.navigate('AltContato', { contato: user })}
+          >
+            <View style={styles.contactCard}>
+              <View style={styles.contactRow}>
+                <View style={styles.avatar}>
+                  <FontAwesome name="user" size={20} color="#f790bb" />
+                </View>
+
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.contactName}>{user.name}</Text>
+                  <Text style={styles.contactPhone}>{user.phone}</Text>
+                </View>
+              </View>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+function CadContato({ navigation }) {
+  return (
+    <SafeAreaView style={{ flex: 1 }}>
+
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <FontAwesome name="arrow-left" size={22} color="#ff8daf" />
+        </TouchableOpacity>
+
+        <Text style={styles.headerText}>Contato</Text>
+
+        <View style={{ width: 22 }} />
+      </View>
+
+      <View style={styles.container}>
+        <Text style={styles.label}>Nome</Text>
+        <TextInput style={styles.input} />
+
+        <Text style={styles.label}>Email</Text>
+        <TextInput style={styles.input} />
+
+        <Text style={styles.label}>Telefone</Text>
+        <TextInput style={styles.input} />
+
+        <TouchableOpacity
+          style={[styles.button, styles.Botao1]}
+        >
+          <Text style={styles.buttonText}>Salvar</Text>
         </TouchableOpacity>
       </View>
 
-      <ScrollView>
-        {users.map((user, index) => (
-          <View key={index} style={styles.contactCard}>
-            <View style={styles.contactRow}>
-              <View style={styles.avatar}>
-                <FontAwesome name="user" size={20} color="#fff" />
-              </View>
+    </SafeAreaView>
+  )
+}
 
-              <View style={{ flex: 1 }}>
-                <Text style={styles.contactName}>{user.name}</Text>
-                <Text style={styles.contactPhone}>{user.phone}</Text>
-              </View>
+function AltContato({ navigation, route }) {
+  const { contato } = route.params;
 
-            </View>
-          </View>
-        ))}
-      </ScrollView>
+  const [nome, setNome] = useState(contato.name);
+  const [email, setEmail] = useState(contato.email || '');
+  const [telefone, setTelefone] = useState(contato.phone);
+
+  return (
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <FontAwesome name="arrow-left" size={22} color="#ff8daf" />
+        </TouchableOpacity>
+
+        <Text style={styles.headerText}>Contato</Text>
+
+        <View style={{ width: 22 }} />
+      </View>
+
+      <View style={styles.container}>
+        <Text style={styles.label}>Nome</Text>
+        <TextInput
+          style={styles.input}
+          value={nome}
+          onChangeText={setNome}
+        />
+
+        <Text style={styles.label}>Email</Text>
+        <TextInput
+          style={styles.input}
+          value={email}
+          onChangeText={setEmail}
+        />
+
+        <Text style={styles.label}>Telefone</Text>
+        <TextInput
+          style={styles.input}
+          value={telefone}
+          onChangeText={setTelefone}
+        />
+
+        <TouchableOpacity
+          style={[styles.button, styles.Botao1]}
+        >
+          <Text style={styles.buttonText}>Alterar</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.button, styles.Botao2]}
+        >
+          <Text style={styles.buttonText}>Excluir</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
@@ -169,6 +265,14 @@ export default function App() {
             name="Home"
             component={Contatos}
           />
+          <Stack.Screen
+            name="CadContato"
+            component={CadContato}
+          />
+          <Stack.Screen
+            name="AltContato"
+            component={AltContato}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
@@ -179,7 +283,7 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#ff97bf',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 5,
@@ -196,6 +300,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
     width: 200,
+    color: '#fff',
+    borderColor: "#fff"
   },
 
   titulo: {
@@ -203,8 +309,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
-    backgroundColor: '#292626',
-    color: '#fff',
+    backgroundColor: '#fafafa',
+    color: '#ff97bf',
     width: 400,
   },
 
@@ -223,7 +329,7 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    backgroundColor: '#3b82f6',
+    backgroundColor: '#ffffff',
     padding: 15,
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -232,16 +338,16 @@ const styles = StyleSheet.create({
   },
 
   headerText: {
-    color: '#fff',
+    color: '#ff97bf',
     fontSize: 18,
     fontWeight: 'bold',
   },
 
   contactCard: {
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#ff97bf',
     padding: 15,
     borderBottomWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: '#ff97bf',
   },
 
   contactRow: {
@@ -253,7 +359,7 @@ const styles = StyleSheet.create({
     width: 45,
     height: 45,
     borderRadius: 22,
-    backgroundColor: '#3b82f6',
+    backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 15,
@@ -262,10 +368,11 @@ const styles = StyleSheet.create({
   contactName: {
     fontSize: 16,
     fontWeight: 'bold',
+    color: '#fff'
   },
 
   contactPhone: {
-    color: '#6b7280',
+    color: '#fff',
   },
   button: {
     width: 220,
@@ -277,15 +384,15 @@ const styles = StyleSheet.create({
   },
 
   Botao1: {
-    backgroundColor: '#3b82f6',
+    backgroundColor: '#ffffff',
   },
 
   Botao2: {
-    backgroundColor: '#b91010',
+    backgroundColor: '#fbfcfb',
   },
 
   buttonText: {
-    color: '#fff',
+    color: '#ff97bf',
     fontSize: 15,
     fontWeight: '600',
   },
@@ -294,4 +401,7 @@ const styles = StyleSheet.create({
     top: 10,
     left: 10,
   },
+  label: {
+    color: '#fff',
+  }
 });
