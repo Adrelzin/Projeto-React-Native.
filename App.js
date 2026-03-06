@@ -1,281 +1,132 @@
-import React, { useState } from 'react';
-import { StatusBar } from 'expo-status-bar';
-import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  ScrollView,
-  Image,
-  TouchableOpacity,
-} from 'react-native';
-import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { FontAwesome } from '@expo/vector-icons';
+import React from "react";
+import { View, Text, StyleSheet, Image, TextInput, ScrollView, TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
-const Stack = createNativeStackNavigator();
+const categories = [
+  { label: "Resort", icon: "sunny-outline", lib: "ion" },
+  { label: "Homestay", icon: "home-outline", lib: "ion" },
+  { label: "Hotel", icon: "business-outline", lib: "ion" },
+  { label: "Lodge", icon: "bonfire-outline", lib: "ion" },
+  { label: "Villa", icon: "villa", lib: "mat" },
+  { label: "Apartment", icon: "apartment", lib: "mat" },
+  { label: "Hostel", icon: "bed-outline", lib: "ion" },
+  { label: "See all", icon: "apps-outline", lib: "ion" },
+];
 
-function Login({ navigation }) {
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
+const CategoryIcon = ({ icon, lib }) => {
+  if (lib === "mat") return <MaterialIcons name={icon} size={24} color="#fff" />;
+  return <Ionicons name={icon} size={24} color="#fff" />;
+};
 
+const SectionHeader = ({ title }) => (
+  <View style={styles.sectionHeader}>
+    <Text style={styles.title}>{title}</Text>
+    <Ionicons name="menu" size={22} color="#333" />
+  </View>
+);
+
+export default function Home() {
   return (
-    <SafeAreaView style={styles.container}>
-      <FontAwesome name="user-circle" size={80} color="#fcfdfd" />
+    <View style={styles.container}>
 
-      <Text style={styles.label}>Email</Text>
-      <TextInput
-        style={styles.input}
-        onChangeText={setEmail}
-        value={email}
-        placeholder="Insira o email"
-      />
-
-      <Text style={styles.label}>Senha</Text>
-      <TextInput
-        style={styles.input}
-        onChangeText={setSenha}
-        value={senha}
-        placeholder="Insira a senha"
-        secureTextEntry
-      />
-
-      <TouchableOpacity
-        style={[styles.button, styles.Botao1]}
-        onPress={() => navigation.navigate('Home')}
-      >
-        <Text style={styles.buttonText}>Entrar</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[styles.button, styles.Botao2]}
-        onPress={() => navigation.navigate('Cadastro')}
-      >
-        <Text style={styles.buttonText}>Criar Conta</Text>
-      </TouchableOpacity>
-
-      <StatusBar style="auto" />
-    </SafeAreaView>
-  );
-}
-
-function Cadastro({ navigation }) {
-  return (
-    <SafeAreaView style={{ flex: 1 }}>
-
+      {/* HEADER */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <FontAwesome name="arrow-left" size={22} color="#ff7ebf" />
-        </TouchableOpacity>
 
-        <Text style={styles.headerText}>Cadastro</Text>
+        {/* Logo + Search */}
+        <View style={styles.searchRow}>
+          <View style={styles.logoBox}>
+            <Ionicons name="reorder-three-outline" size={30} color="#fff" />
+            <Ionicons name="airplane" size={14} color="#fff" style={styles.logoPlane} />
+          </View>
 
-        <View style={{ width: 22 }} />
+          <View style={styles.searchBox}>
+            <TextInput placeholder="Search here ..." style={{ flex: 1 }} />
+            <Ionicons name="search" size={20} color="#aaa" />
+          </View>
+        </View>
+
+        {/* User row */}
+        <View style={styles.userRow}>
+          <Image
+            source={{ uri: "https://randomuser.me/api/portraits/women/65.jpg" }}
+            style={styles.avatar}
+          />
+
+          <View>
+            <Text style={styles.welcome}>Welcome!</Text>
+            <Text style={styles.name}>Donna Stroupe</Text>
+          </View>
+
+          <View style={styles.bellWrapper}>
+            <Ionicons name="notifications-outline" size={22} color="#5B57A6" />
+          </View>
+        </View>
+
       </View>
 
-      <View style={styles.container}>
-        <Text style={styles.label}>Nome</Text>
-        <TextInput style={styles.input} />
-
-        <Text style={styles.label}>CPF</Text>
-        <TextInput style={styles.input} />
-
-        <Text style={styles.label}>Email</Text>
-        <TextInput style={styles.input} />
-
-        <Text style={styles.label}>Senha</Text>
-        <TextInput
-          style={styles.input}
-          secureTextEntry
-        />
-
-        <TouchableOpacity
-          style={[styles.button, styles.Botao1]}
-        >
-          <Text style={styles.buttonText}>Salvar</Text>
-        </TouchableOpacity>
-      </View>
-
-    </SafeAreaView>
-  );
-}
-
-function Contatos({ navigation }) {
-  const users = [
-    {
-      name: 'Estéfanas Argentina',
-      phone: '81 98855-3424',
-      email: 'estarg@gmail.com'
-    },
-    {
-      name: 'Adryell Willian',
-      phone: '81 99876-5332',
-      email: 'adwl@gmail.com'
-    },
-    {
-      name: 'Nilson Cardoso',
-      phone: '81 98776-5525',
-      email: 'nilcar@gmail.com'
-    },
-  ];
-
-  return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Lista de Contatos</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('CadContato')}>
-          <FontAwesome name="plus" size={22} color="#ee86b7" />
-        </TouchableOpacity>
-      </View>
       <ScrollView>
-        {users.map((user, index) => (
-          <TouchableOpacity
-            key={index}
-            onPress={() => navigation.navigate('AltContato', { contato: user })}
-          >
-            <View style={styles.contactCard}>
-              <View style={styles.contactRow}>
-                <View style={styles.avatar}>
-                  <FontAwesome name="user" size={20} color="#f790bb" />
-                </View>
 
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.contactName}>{user.name}</Text>
-                  <Text style={styles.contactPhone}>{user.phone}</Text>
+        {/* CATEGORY */}
+        <View style={styles.section}>
+          <SectionHeader title="Category" />
+
+          <View style={styles.categoryGrid}>
+            {categories.map((item, index) => (
+              <TouchableOpacity key={index} style={styles.categoryItem}>
+                <View style={styles.circle}>
+                  <CategoryIcon icon={item.icon} lib={item.lib} />
                 </View>
-              </View>
-            </View>
-          </TouchableOpacity>
-        ))}
+                <Text style={styles.categoryLabel}>{item.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* POPULAR DESTINATION */}
+        <View style={styles.section}>
+          <SectionHeader title="Popular Destination" />
+
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <Image source={{ uri: "https://picsum.photos/id/280/400/400" }} style={styles.destination} />
+            <Image source={{ uri: "https://picsum.photos/id/167/400/400" }} style={styles.destination} />
+            <Image source={{ uri: "https://picsum.photos/id/Nature/400/400" }} style={styles.destination} />
+          </ScrollView>
+        </View>
+
+        {/* RECOMMENDED */}
+        <View style={styles.section}>
+          <SectionHeader title="Recommended" />
+
+          <View style={styles.recommendedRow}>
+            <Image source={{ uri: "https://picsum.photos/id/15/800/400" }} style={styles.recommended} />
+            <Image source={{ uri: "https://picsum.photos/id/50/800/400" }} style={styles.recommended} />
+          </View>
+        </View>
+
       </ScrollView>
-    </SafeAreaView>
-  );
-}
 
-function CadContato({ navigation }) {
-  return (
-    <SafeAreaView style={{ flex: 1 }}>
-
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <FontAwesome name="arrow-left" size={22} color="#ff8daf" />
-        </TouchableOpacity>
-
-        <Text style={styles.headerText}>Contato</Text>
-
-        <View style={{ width: 22 }} />
+      {/* BOTTOM MENU */}
+      <View style={styles.bottomMenu}>
+        <View style={styles.bottomItem}>
+          <Ionicons name="home" size={24} color="white" />
+          <Text style={styles.bottomLabel}>Home</Text>
+        </View>
+        <View style={styles.bottomItem}>
+          <Ionicons name="compass-outline" size={24} color="white" />
+          <Text style={styles.bottomLabel}>Explore</Text>
+        </View>
+        <View style={styles.bottomItem}>
+          <Ionicons name="search-outline" size={24} color="white" />
+          <Text style={styles.bottomLabel}>Search</Text>
+        </View>
+        <View style={styles.bottomItem}>
+          <Ionicons name="person-outline" size={24} color="white" />
+          <Text style={styles.bottomLabel}>Profile</Text>
+        </View>
       </View>
 
-      <View style={styles.container}>
-        <Text style={styles.label}>Nome</Text>
-        <TextInput style={styles.input} />
-
-        <Text style={styles.label}>Email</Text>
-        <TextInput style={styles.input} />
-
-        <Text style={styles.label}>Telefone</Text>
-        <TextInput style={styles.input} />
-
-        <TouchableOpacity
-          style={[styles.button, styles.Botao1]}
-        >
-          <Text style={styles.buttonText}>Salvar</Text>
-        </TouchableOpacity>
-      </View>
-
-    </SafeAreaView>
-  )
-}
-
-function AltContato({ navigation, route }) {
-  const { contato } = route.params;
-
-  const [nome, setNome] = useState(contato.name);
-  const [email, setEmail] = useState(contato.email || '');
-  const [telefone, setTelefone] = useState(contato.phone);
-
-  return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <FontAwesome name="arrow-left" size={22} color="#ff8daf" />
-        </TouchableOpacity>
-
-        <Text style={styles.headerText}>Contato</Text>
-
-        <View style={{ width: 22 }} />
-      </View>
-
-      <View style={styles.container}>
-        <Text style={styles.label}>Nome</Text>
-        <TextInput
-          style={styles.input}
-          value={nome}
-          onChangeText={setNome}
-        />
-
-        <Text style={styles.label}>Email</Text>
-        <TextInput
-          style={styles.input}
-          value={email}
-          onChangeText={setEmail}
-        />
-
-        <Text style={styles.label}>Telefone</Text>
-        <TextInput
-          style={styles.input}
-          value={telefone}
-          onChangeText={setTelefone}
-        />
-
-        <TouchableOpacity
-          style={[styles.button, styles.Botao1]}
-        >
-          <Text style={styles.buttonText}>Alterar</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.button, styles.Botao2]}
-        >
-          <Text style={styles.buttonText}>Excluir</Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
-  );
-}
-
-export default function App() {
-  return (
-    <SafeAreaProvider>
-      <NavigationContainer>
-        <Stack.Navigator
-          initialRouteName="Login"
-          screenOptions={{ headerShown: false }}
-        >
-          <Stack.Screen
-            name="Login"
-            component={Login}
-          />
-          <Stack.Screen
-            name="Cadastro"
-            component={Cadastro}
-          />
-          <Stack.Screen
-            name="Home"
-            component={Contatos}
-          />
-          <Stack.Screen
-            name="CadContato"
-            component={CadContato}
-          />
-          <Stack.Screen
-            name="AltContato"
-            component={AltContato}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </SafeAreaProvider>
+    </View>
   );
 }
 
@@ -283,125 +134,160 @@ const styles = StyleSheet.create({
 
   container: {
     flex: 1,
-    backgroundColor: '#ff97bf',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 5,
-  },
-
-  tinyLogo: {
-    width: 50,
-    height: 50,
-  },
-
-  input: {
-    height: 40,
-    margin: 12,
-    borderWidth: 1,
-    padding: 10,
-    width: 200,
-    color: '#fff',
-    borderColor: "#fff"
-  },
-
-  titulo: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-    backgroundColor: '#fafafa',
-    color: '#ff97bf',
-    width: 400,
-  },
-
-  form: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  text: {
-    marginRight: 160,
-  },
-
-  imglog: {
-    gap: 15,
+    backgroundColor: "#fff",
   },
 
   header: {
-    backgroundColor: '#ffffff',
-    padding: 15,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
+    backgroundColor: "#5B57A6",
+    padding: 20,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
 
-  headerText: {
-    color: '#ff97bf',
-    fontSize: 18,
-    fontWeight: 'bold',
+  searchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 15,
   },
 
-  contactCard: {
-    backgroundColor: '#ff97bf',
-    padding: 15,
-    borderBottomWidth: 1,
-    borderColor: '#ff97bf',
+  logoBox: {
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
-  contactRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  logoPlane: {
+    position: "absolute",
+    top: 2,
+    right: 2,
+    transform: [{ rotate: "45deg" }],
+  },
+
+  searchBox: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderRadius: 25,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+
+  userRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
   },
 
   avatar: {
-    width: 45,
-    height: 45,
-    borderRadius: 22,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 15,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 2,
+    borderColor: "#fff",
   },
 
-  contactName: {
+  welcome: {
+    color: "#fff",
+    fontWeight: "bold",
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#fff'
   },
 
-  contactPhone: {
-    color: '#fff',
-  },
-  button: {
-    width: 220,
-    height: 45,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 12,
+  name: {
+    color: "#ddd",
+    fontSize: 13,
   },
 
-  Botao1: {
-    backgroundColor: '#ffffff',
+  bellWrapper: {
+    marginLeft: "auto",
+    backgroundColor: "#fff",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
-  Botao2: {
-    backgroundColor: '#fbfcfb',
+  section: {
+    padding: 20,
   },
 
-  buttonText: {
-    color: '#ff97bf',
-    fontSize: 15,
-    fontWeight: '600',
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 15,
   },
-  botaoVoltar: {
-    position: 'absolute',
-    top: 10,
-    left: 10,
+
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
   },
-  label: {
-    color: '#fff',
-  }
+
+  categoryGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+
+  categoryItem: {
+    alignItems: "center",
+    width: "22%",
+    marginBottom: 15,
+  },
+
+  circle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#5B57A6",
+    marginBottom: 6,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  categoryLabel: {
+    fontSize: 11,
+    textAlign: "center",
+    color: "#333",
+  },
+
+  destination: {
+    width: 130,
+    height: 130,
+    borderRadius: 15,
+    marginRight: 10,
+  },
+
+  recommendedRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
+
+  recommended: {
+    flex: 1,
+    height: 150,
+    borderRadius: 15,
+  },
+
+  bottomMenu: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    backgroundColor: "#5B57A6",
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+  },
+
+  bottomItem: {
+    alignItems: "center",
+    gap: 4,
+  },
+
+  bottomLabel: {
+    color: "#fff",
+    fontSize: 11,
+  },
 });
