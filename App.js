@@ -1,12 +1,8 @@
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  ScrollView,
-  TouchableOpacity,
+  StyleSheet, Text, View, TextInput,
+  ScrollView, TouchableOpacity, Alert
 } from 'react-native';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
@@ -15,20 +11,47 @@ import { FontAwesome } from '@expo/vector-icons';
 
 const Stack = createNativeStackNavigator();
 
-function Login({ navigation }) {
+function Login({ navigation, usuarios }) {
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+
   return (
     <SafeAreaView style={styles.container}>
       <FontAwesome name="user-circle" size={80} color="#fcfdfd" />
 
       <Text style={styles.label}>Email</Text>
-      <TextInput style={styles.input} placeholder="Insira o email" />
+      <TextInput
+        style={styles.input}
+        placeholder="Insira o email"
+        value={email}
+        onChangeText={setEmail}
+      />
 
       <Text style={styles.label}>Senha</Text>
-      <TextInput style={styles.input} placeholder="Insira a senha" secureTextEntry />
+      <TextInput
+        style={styles.input}
+        placeholder="Insira a senha"
+        secureTextEntry
+        value={senha}
+        onChangeText={setSenha}
+      />
 
       <TouchableOpacity
         style={[styles.button, styles.Botao1]}
-        onPress={() => navigation.navigate('Home')}
+        onPress={() => {
+          if (!email || !senha) {
+            Alert.alert('Atenção', 'Preencha o email e a senha!');
+            return;
+          }
+          const usuarioEncontrado = usuarios.find(
+            (u) => u.email === email && u.senha === senha
+          );
+          if (usuarioEncontrado) {
+            navigation.navigate('Home');
+          } else {
+            Alert.alert('Erro', 'Email ou senha incorretos!');
+          }
+        }}
       >
         <Text style={styles.buttonText}>Entrar</Text>
       </TouchableOpacity>
@@ -43,7 +66,12 @@ function Login({ navigation }) {
   );
 }
 
-function Cadastro({ navigation }) {
+function Cadastro({ navigation, usuarios, setUsuarios }) {
+  const [nome, setNome] = useState('');
+  const [cpf, setCpf] = useState('');
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.header}>
@@ -56,20 +84,28 @@ function Cadastro({ navigation }) {
 
       <View style={styles.container}>
         <Text style={styles.label}>Nome</Text>
-        <TextInput style={styles.input} />
+        <TextInput style={styles.input} value={nome} onChangeText={setNome} />
 
         <Text style={styles.label}>CPF</Text>
-        <TextInput style={styles.input} />
+        <TextInput style={styles.input} value={cpf} onChangeText={setCpf} />
 
         <Text style={styles.label}>Email</Text>
-        <TextInput style={styles.input} />
+        <TextInput style={styles.input} value={email} onChangeText={setEmail} />
 
         <Text style={styles.label}>Senha</Text>
-        <TextInput style={styles.input} secureTextEntry />
+        <TextInput style={styles.input} value={senha} onChangeText={setSenha} secureTextEntry />
 
         <TouchableOpacity
           style={[styles.button, styles.Botao1]}
-          onPress={() => navigation.goBack()}
+          onPress={() => {
+            if (!nome || !cpf || !email || !senha) {
+              Alert.alert('Erro', 'Preencha todos os campos!');
+              return;
+            }
+            setUsuarios([...usuarios, { nome, cpf, email, senha }]);
+            Alert.alert('Sucesso', 'Conta criada com sucesso!');
+            navigation.goBack();
+          }}
         >
           <Text style={styles.buttonText}>Salvar</Text>
         </TouchableOpacity>
@@ -89,19 +125,21 @@ function Contatos({ navigation, contatos }) {
       </View>
 
       <ScrollView>
+        {contatos.length === 0 && (
+          <Text style={{ textAlign: 'center', marginTop: 30, color: '#aaa' }}>
+            Nenhum contato cadastrado.
+          </Text>
+        )}
         {contatos.map((user, index) => (
           <TouchableOpacity
             key={index}
-            onPress={() =>
-              navigation.navigate('AltContato', { contato: user, index })
-            }
+            onPress={() => navigation.navigate('AltContato', { contato: user, index })}
           >
             <View style={styles.contactCard}>
               <View style={styles.contactRow}>
                 <View style={styles.avatar}>
                   <FontAwesome name="user" size={20} color="#f790bb" />
                 </View>
-
                 <View style={{ flex: 1 }}>
                   <Text style={styles.contactName}>{user.name}</Text>
                   <Text style={styles.contactPhone}>{user.phone}</Text>
@@ -126,7 +164,7 @@ function CadContato({ navigation, contatos, setContatos }) {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <FontAwesome name="arrow-left" size={22} color="#ff8daf" />
         </TouchableOpacity>
-        <Text style={styles.headerText}>Contato</Text>
+        <Text style={styles.headerText}>Novo Contato</Text>
         <View style={{ width: 22 }} />
       </View>
 
@@ -143,8 +181,10 @@ function CadContato({ navigation, contatos, setContatos }) {
         <TouchableOpacity
           style={[styles.button, styles.Botao1]}
           onPress={() => {
-            if (!nome || !telefone) return;
-
+            if (!nome || !telefone) {
+              Alert.alert('Erro', 'Nome e telefone são obrigatórios!');
+              return;
+            }
             setContatos([...contatos, { name: nome, email, phone: telefone }]);
             navigation.goBack();
           }}
@@ -169,7 +209,7 @@ function AltContato({ navigation, route, contatos, setContatos }) {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <FontAwesome name="arrow-left" size={22} color="#ff8daf" />
         </TouchableOpacity>
-        <Text style={styles.headerText}>Contato</Text>
+        <Text style={styles.headerText}>Editar Contato</Text>
         <View style={{ width: 22 }} />
       </View>
 
@@ -212,30 +252,30 @@ function AltContato({ navigation, route, contatos, setContatos }) {
 
 export default function App() {
   const [contatos, setContatos] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
 
   return (
     <SafeAreaProvider>
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Login" component={Login} />
-          <Stack.Screen name="Cadastro" component={Cadastro} />
+          <Stack.Screen name="Login">
+            {(props) => <Login {...props} usuarios={usuarios} />}
+          </Stack.Screen>
+
+          <Stack.Screen name="Cadastro">
+            {(props) => <Cadastro {...props} usuarios={usuarios} setUsuarios={setUsuarios} />}
+          </Stack.Screen>
 
           <Stack.Screen name="Home">
-            {(props) => (
-              <Contatos {...props} contatos={contatos} />
-            )}
+            {(props) => <Contatos {...props} contatos={contatos} />}
           </Stack.Screen>
 
           <Stack.Screen name="CadContato">
-            {(props) => (
-              <CadContato {...props} contatos={contatos} setContatos={setContatos} />
-            )}
+            {(props) => <CadContato {...props} contatos={contatos} setContatos={setContatos} />}
           </Stack.Screen>
 
           <Stack.Screen name="AltContato">
-            {(props) => (
-              <AltContato {...props} contatos={contatos} setContatos={setContatos} />
-            )}
+            {(props) => <AltContato {...props} contatos={contatos} setContatos={setContatos} />}
           </Stack.Screen>
         </Stack.Navigator>
       </NavigationContainer>
@@ -251,7 +291,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-
   input: {
     height: 40,
     margin: 12,
@@ -259,9 +298,8 @@ const styles = StyleSheet.create({
     padding: 10,
     width: 200,
     color: '#fff',
-    borderColor: "#fff"
+    borderColor: '#fff',
   },
-
   header: {
     backgroundColor: '#ffffff',
     padding: 15,
@@ -270,24 +308,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
   },
-
   headerText: {
     color: '#ff97bf',
     fontSize: 18,
     fontWeight: 'bold',
   },
-
   contactCard: {
     backgroundColor: '#ff97bf',
     padding: 15,
     borderBottomWidth: 1,
   },
-
   contactRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-
   avatar: {
     width: 45,
     height: 45,
@@ -297,17 +331,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: 15,
   },
-
   contactName: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#fff'
+    color: '#fff',
   },
-
   contactPhone: {
     color: '#fff',
   },
-
   button: {
     width: 220,
     height: 45,
@@ -316,22 +347,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 12,
   },
-
   Botao1: {
     backgroundColor: '#ffffff',
   },
-
   Botao2: {
     backgroundColor: '#fbfcfb',
   },
-
   buttonText: {
     color: '#ff97bf',
     fontSize: 15,
     fontWeight: '600',
   },
-
   label: {
     color: '#fff',
-  }
+  },
 });
