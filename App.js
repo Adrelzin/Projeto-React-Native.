@@ -1,70 +1,165 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  SafeAreaView,
+  StyleSheet
+} from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { auth } from './firebaseConfig';
-import { onAuthStateChanged } from 'firebase/auth';
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
+const Stack = createNativeStackNavigator();
 
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyC5BVI93vIkRtAXerR31YTE9ek3BzU-4e8",
   authDomain: "aula6-atividade-prog3.firebaseapp.com",
   projectId: "aula6-atividade-prog3",
   storageBucket: "aula6-atividade-prog3.firebasestorage.app",
   messagingSenderId: "466202203055",
-  appId: "1:466202203055:web:6a5aa9759cc9429eeb955a",
-  measurementId: "G-DJB4566313"
+  appId: "1:466202203055:web:6a5aa9759cc9429eeb955a"
 };
 
-// Initialize Firebase
+
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-
-function cadastro(email, password, setMsg) {
-  const auth = getAuth();
-
-  createUserWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      // Signed in
-      const user = userCredential.user;
-      console.log("Usuário criado:", user);
-      // ...
-    })
-    .catch((error) => {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-
-    console.error("Erro:", errorCode, errorMessage);
-  
-    });
-}
-function login() { }
-
-function TelaPrincipal() { }
+const auth = getAuth(app);
 
 export default function App() {
-    return (
+  return (
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="Cadastro" component={Cadastro} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+function Cadastro() {
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+
+  const cadastrar = () => {
+    if (!email || !senha) {
+      Alert.alert('Erro', 'Preencha todos os campos!');
+      return;
+    }
+
+    createUserWithEmailAndPassword(auth, email, senha)
+      .then(() => {
+        Alert.alert('Sucesso', 'Conta criada!');
+      })
+      .catch((error) => {
+        Alert.alert('Erro', error.message);
+      });
+  };
+
+  return (
+    <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
-        <Text>Open up App.js to start working on your app!</Text>
+
+        <Text>Email</Text>
+        <TextInput style={styles.input} value={email} onChangeText={setEmail} />
+
+        <Text>Senha</Text>
+        <TextInput
+          style={styles.input}
+          value={senha}
+          onChangeText={setSenha}
+          secureTextEntry
+        />
+
+        <TouchableOpacity style={styles.button} onPress={cadastrar}>
+          <Text style={styles.buttonText}>Cadastrar</Text>
+        </TouchableOpacity>
+
         <StatusBar style="auto" />
       </View>
-    );
-  }
+    </SafeAreaView>
+  );
+}
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: '#fff',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-  });
+function Login({ navigation }) {
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+
+  const login = () => {
+    if (!email || !senha) {
+      Alert.alert('Erro', 'Preencha todos os campos');
+      return;
+    }
+
+    signInWithEmailAndPassword(auth, email, senha)
+      .then(() => {
+        Alert.alert('Sucesso', 'Logado');
+      })
+      .catch((error) => {
+        Alert.alert('Erro', error.message);
+      });
+  };
+
+  return (
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={styles.container}>
+        <Text>Email</Text>
+        <TextInput
+          style={styles.input}
+          value={email}
+          onChangeText={setEmail}
+        />
+
+        <Text>Senha</Text>
+        <TextInput
+          style={styles.input}
+          value={senha}
+          onChangeText={setSenha}
+          secureTextEntry
+        />
+
+        <TouchableOpacity style={styles.button} onPress={login}>
+          <Text style={styles.buttonText}>Entrar</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate('Cadastro')}>
+          <Text style={{ marginTop: 10, textAlign: 'center' }}>
+            Criar conta
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+function TelaPrincipal({ navigation }) {
+  const
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    justifyContent: 'center'
+  },
+  input: {
+    borderWidth: 1,
+    padding: 10,
+    marginTop: 5,
+    borderRadius: 5
+  },
+  button: {
+    backgroundColor: '#007bff',
+    padding: 15,
+    marginTop: 20,
+    borderRadius: 5
+  },
+  buttonText: {
+    color: '#fff',
+    textAlign: 'center'
+  }
+});
