@@ -7,13 +7,11 @@ import {
   Alert,
   SafeAreaView,
   StyleSheet,
-  SafeAreaViewBase,
   ActivityIndicator
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { initializeApp } from "firebase/app";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
@@ -28,27 +26,34 @@ const firebaseConfig = {
   appId: "1:466202203055:web:6a5aa9759cc9429eeb955a"
 };
 
-
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name="Login" component={Login} />
-        <Stack.Screen name="Cadastro" component={Cadastro} />
-        <Stack.Screen name="TelaPrincipal" component={TelaPrincipal} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <View style={styles.webContainer}>
+      <View style={styles.appWrapper}>
+        <NavigationContainer>
+          <Stack.Navigator>
+            <Stack.Screen name="Login" component={Login} />
+            <Stack.Screen name="Cadastro" component={Cadastro} />
+            <Stack.Screen name="TelaPrincipal" component={TelaPrincipal} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </View>
+    </View>
   );
 }
 
+// ===== CADASTRO =====
 function Cadastro({ navigation }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [erro, setErro] = useState('');
 
   const cadastrar = () => {
+    setErro('');
+
     if (!email || !senha) {
       Alert.alert('Erro', 'Preencha todos os campos!');
       return;
@@ -57,45 +62,49 @@ function Cadastro({ navigation }) {
     createUserWithEmailAndPassword(auth, email, senha)
       .then(() => {
         Alert.alert('Sucesso', 'Conta criada!');
-        navigation.navigate('TelaPrincipal');
+        navigation.replace('TelaPrincipal');
       })
       .catch((error) => {
-        Alert.alert('Erro', error.message);
-      });
-  };
+        if (error.code === 'auth/email-already-in-use') {
+        setErro('Email já está em uso');
+      } else if (error.code === 'auth/invalid-email') {
+        setErro('Email inválido');
+
+         } else {
+        setErro('Erro ao cadastrar');
+      }
+  });
+};
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
-
         <Text>Email</Text>
         <TextInput style={styles.input} value={email} onChangeText={setEmail} />
 
         <Text>Senha</Text>
-        <TextInput
-          style={styles.input}
-          value={senha}
-          onChangeText={setSenha}
-          secureTextEntry
-        />
+        <TextInput style={styles.input} value={senha} onChangeText={setSenha} secureTextEntry />
 
         <TouchableOpacity style={styles.button} onPress={cadastrar}>
           <Text style={styles.buttonText}>Cadastrar</Text>
         </TouchableOpacity>
 
+        {erro ? <Text style={{ color: 'red', marginTop: 10 }}>{erro}</Text> : null}
+
         <StatusBar style="auto" />
       </View>
     </SafeAreaView>
   );
+
 }
 
 function Login({ navigation }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-  const [erro, setErro] = useState(''); 
+  const [erro, setErro] = useState('');
 
   const login = () => {
-    setErro(''); 
+    setErro('');
     if (!email || !senha) {
       setErro('Preencha todos os campos');
       return;
@@ -103,16 +112,10 @@ function Login({ navigation }) {
 
     signInWithEmailAndPassword(auth, email, senha)
       .then(() => {
-        navigation.navigate('TelaPrincipal');
+        navigation.replace('TelaPrincipal');
       })
       .catch((error) => {
-        if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
-          setErro('Email ou senha incorretos');
-        } else if (error.code === 'auth/user-not-found') {
-          setErro('Usuário não encontrado');
-        } else {
-          setErro(error.message);
-        }
+        setErro("Email ou senha errada");
       });
   };
 
@@ -125,7 +128,7 @@ function Login({ navigation }) {
         <Text>Senha</Text>
         <TextInput style={styles.input} value={senha} onChangeText={setSenha} secureTextEntry />
 
-        {erro ? <Text style={{ color: 'red', marginTop: 10 }}>{erro}</Text> : null} 
+        {erro ? <Text style={{ color: 'red', marginTop: 10 }}>{erro}</Text> : null}
 
         <TouchableOpacity style={styles.button} onPress={login}>
           <Text style={styles.buttonText}>Entrar</Text>
@@ -151,14 +154,13 @@ function TelaPrincipal() {
       const dados = await resposta.json();
 
       setCotacoes({
-        usd: parseFloat(dados.USD.bid).toFixed(2), 
-        eur: parseFloat(dados.EUR.bid).toFixed(2),
+        usd: parseFloat(dados.USDBRL.bid).toFixed(2),
+        eur: parseFloat(dados.EURBRL.bid).toFixed(2),
       });
 
-      const agora = new Date();
-      setAtualizadoEm(agora.toLocaleString('pt-BR'));
-    } catch (error) {
-      Alert.alert('Erro', 'Não foi possível buscar as cotações');
+      setAtualizadoEm(new Date().toLocaleString('pt-BR'));
+    } catch {
+      Alert.alert('Erro', 'Falha ao buscar cotações');
     } finally {
       setCarregando(false);
     }
@@ -169,118 +171,161 @@ function TelaPrincipal() {
   }, []);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
-      <View style={styles.containerPrincipal}>
-        <Text style={styles.titulo}>Cotação de Moedas</Text>
-        <Text style={styles.subtitulo}>Última atualização: {atualizadoEm}</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#eef2f5' }}>
+
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Cotação de Moedas</Text>
+      </View>
+
+      <View style={{ padding: 20 }}>
+        <View style={styles.subHeader}>
+          <Text style={styles.subHeaderTitle}>Cotação Atual</Text>
+          <Text style={styles.subHeaderText}>
+            Última atualização: {atualizadoEm}
+          </Text>
+        </View>
 
         {carregando ? (
-          <ActivityIndicator size="large" color="#007bff" style={{ marginVertical: 20 }} />
+          <ActivityIndicator size="large" color="#4CAF50" />
         ) : (
-          <View>
-            {/* Cartão Dólar */}
+          <>
             <View style={styles.card}>
-              <Text style={styles.moedaNome}>🇺🇸 Dólar Americano (USD)</Text>
-              <Text style={styles.valor}>R$ {cotacoes?.usd}</Text>
+              <Text style={styles.moeda}>🇺🇸 Dólar Americano (USD)</Text>
+              <Text style={styles.valor}>R$ {cotacoes ? cotacoes.usd : '--'}</Text>
             </View>
 
-            {/* Cartão Euro */}
             <View style={styles.card}>
-              <Text style={styles.moedaNome}>🇪🇺 Euro (EUR)</Text>
-              <Text style={styles.valor}>R$ {cotacoes?.eur}</Text>
+              <Text style={styles.moeda}>🇪🇺 Euro (EUR)</Text>
+              <Text style={styles.valor}>R$ {cotacoes ? cotacoes.eur : '--'}</Text>
             </View>
-          </View>
+          </>
         )}
 
-        <TouchableOpacity style={styles.button} onPress={buscarCotacoes}>
-          <Text style={styles.buttonText}>Atualizar Cotações</Text>
+        <TouchableOpacity
+          style={styles.botao}
+          onPress={buscarCotacoes}
+          disabled={carregando}
+        >
+          <Text style={styles.botaoTexto}>
+            {carregando ? 'Atualizando...' : 'Atualizar Cotações'}
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
 }
 
+// ===== ESTILOS =====
 const styles = StyleSheet.create({
-  container: {
+  webContainer: {
     flex: 1,
-    padding: 20,
-    justifyContent: 'center'
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#ccc',
   },
-  input: {
-    borderWidth: 1,
-    padding: 10,
-    marginTop: 5,
-    borderRadius: 5
-  },
-  button: {
-    backgroundColor: '#007bff',
-    padding: 15,
-    marginTop: 20,
-    borderRadius: 5
-  },
-  buttonText: {
-    color: '#fff',
-    textAlign: 'center'
-  },
-  containerPrincipal: {
-    flex: 1,
-    padding: 20,
-    alignItems: 'stretch',
-  },
-  titulo: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 5,
-  },
-  subtitulo: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  card: {
+
+  appWrapper: {
+    width: '100%',
+    maxWidth: 420,
+    height: '100%',
     backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 10,
-    marginBottom: 15,
-    elevation: 3,  
-    shadowColor: '#000', 
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    borderRadius: 20,
+    overflow: 'hidden',
   },
-  moedaNome: {
-    fontSize: 16,
-    color: '#333',
-  },
-  valor: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#007bff',
-    marginTop: 5,
-  },
+
   container: {
     flex: 1,
     padding: 20,
-    justify: 'center'
+    justifyContent: 'center',
   },
+
   input: {
     borderWidth: 1,
     padding: 10,
     marginTop: 5,
     borderRadius: 5,
-    borderColor: '#ddd'
+    borderColor: '#ddd',
   },
+
   button: {
     backgroundColor: '#007bff',
     padding: 15,
     marginTop: 20,
-    borderRadius: 5
+    borderRadius: 5,
   },
+
   buttonText: {
     color: '#fff',
     textAlign: 'center',
-    fontWeight: 'bold'
-  }
+    fontWeight: 'bold',
+  },
+
+  header: {
+    backgroundColor: '#2f3c7e',
+    padding: 20,
+    alignItems: 'center',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+  },
+
+  headerTitle: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+
+  subHeader: {
+    backgroundColor: '#fff',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 20,
+    alignItems: 'center',
+    elevation: 2,
+  },
+
+  subHeaderTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+
+  subHeaderText: {
+    fontSize: 12,
+    color: '#666',
+  },
+
+  card: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 15,
+    marginBottom: 15,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    elevation: 3,
+  },
+
+  moeda: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+
+  valor: {
+    fontSize: 20,
+    color: '#2f3c7e',
+    fontWeight: 'bold',
+  },
+
+  botao: {
+    backgroundColor: '#4CAF50',
+    padding: 15,
+    borderRadius: 30,
+    marginTop: 20,
+    alignItems: 'center',
+  },
+
+  botaoTexto: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
 });
