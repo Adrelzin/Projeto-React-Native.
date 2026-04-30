@@ -45,11 +45,24 @@ function Cadastro({ navigation }) {
   const [erro, setErro] = useState('');
 
   const cadastrar = () => {
-    if (!email || !senha) return Alert.alert('Erro', 'Preencha todos os campos!');
-    createUserWithEmailAndPassword(auth, email, senha)
-      .then(() => { Alert.alert('Sucesso', 'Conta criada!'); navigation.replace('TelaPrincipal'); })
-      .catch(() => setErro('Erro ao cadastrar'));
-  };
+    if (!email || !senha) {
+    return Alert.alert('Erro', 'Preencha todos os campos!');
+  }
+
+  if (senha.length < 6) {
+    return setErro('A senha deve ter pelo menos 6 caracteres.');
+  }
+
+  createUserWithEmailAndPassword(auth, email, senha)
+    .then(() => {
+      Alert.alert('Sucesso', 'Conta criada!');
+      navigation.replace('TelaPrincipal');
+    })
+    .catch((error) => {
+      console.log(error);
+      setErro(error.message);
+    });
+};
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f7fa' }}>
@@ -59,7 +72,7 @@ function Cadastro({ navigation }) {
         <TextInput style={styles.input} placeholder="Senha" value={senha} onChangeText={setSenha} secureTextEntry />
         {erro ? <Text style={styles.errorText}>{erro}</Text> : null}
         <TouchableOpacity style={styles.button} onPress={cadastrar}><Text style={styles.buttonText}>Cadastrar</Text></TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Login')}><Text style={styles.linkText}>Já tem conta? Login</Text></TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.replace('Login')}><Text style={styles.linkText}>Já tem conta? Login</Text></TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -85,7 +98,7 @@ function Login({ navigation }) {
         <TextInput style={styles.input} placeholder="Senha" value={senha} onChangeText={setSenha} secureTextEntry />
         {erro ? <Text style={styles.errorText}>{erro}</Text> : null}
         <TouchableOpacity style={styles.button} onPress={login}><Text style={styles.buttonText}>Entrar</Text></TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Cadastro')}><Text style={styles.linkText}>Criar conta</Text></TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.replace('Cadastro')}><Text style={styles.linkText}>Criar conta</Text></TouchableOpacity>
       </View>
     </SafeAreaView>
   );
