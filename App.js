@@ -97,7 +97,22 @@ function Cadastro(){
 }
 
 function TelaPrincipal(){
+  const [dados, setDados] = useState([]);
+  const [carregando, setCarregando] = useState(true);
 
+  useEffect(() => {
+    async function buscarDados() {
+      try{
+        const resposta = await fetch();
+        const dadosConvertidos = await resposta.json();
+        setDados(dadosConvertidos);
+      }catch(error){
+        console.error("Erro ao buscar dados:", error);
+      }finally{
+        setCarregando(false);
+      }
+    }
+  })
 }
 
 function Detalhes(){
