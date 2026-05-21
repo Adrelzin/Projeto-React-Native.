@@ -13,6 +13,7 @@ import {
   FlatList
 } from 'react-native';
 import { initializeApp } from "firebase/app";
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -44,6 +45,7 @@ function App() {
             <Stack.Screen name="Favoritos" component={Favoritos} />
             <Stack.Screen name="Perfil" component={Perfil} />
             <Stack.Screen name="AlterarFoto" component={AlterarFoto} />
+            <Stack.Screen name="AlterarSenha" component={AlterarSenha} />
           </Stack.Navigator>
         </NavigationContainer>
       </View>
@@ -56,13 +58,20 @@ function Login({ navigation }) {
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
 
+  const login = () => {
+    if (!email || !senha) return setErro('Preencha todos os campos');
+    signInWithEmailAndPassword(auth, email, senha)
+      .then(() => navigation.replace('TelaPrincipal'))
+      .catch(() => setErro("Email ou senha errada"));
+  }
+
   return (
     <SafeAreaView>
       <View>
         <Text>CONHEÇA O MUNDO</Text>
         <Text>Explore. Descubra. Viaje.</Text>
-        <TextInput placeholder='Email' value={email} onChangeText={setEmail} autoCapitalize='none'></TextInput>
-        <TextInput placeholder='Senha' value={senha} onChangeText={setSenha} autoCapitalize='none' secureTextEntry></TextInput>
+        <TextInput placeholder='Email' value={email} onChangeText={setEmail} autoCapitalize='none' autoComplete="new-pasword"></TextInput>
+        <TextInput placeholder='Senha' value={senha} onChangeText={setSenha} autoCapitalize='none' secureTextEntry autoComplete="new-pasword"></TextInput>
         <TouchableOpacity style={styles.button} onPress={login}><Text style={styles.buttonText}>Entrar</Text></TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.replace('Cadastro')}><Text style={styles.linkText}>Ainda não tem uma conta? Cadastre-se</Text></TouchableOpacity>
       </View>
@@ -70,9 +79,12 @@ function Login({ navigation }) {
   );
 }
 
+
 function Cadastro({ navigation }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [confsenha, setConfSenha] = useState(false);
+  const [nome, setNome] = useState('');
   const [erro, setErro] = useState('');
 
   const cadastrar = () => {
@@ -84,7 +96,7 @@ function Cadastro({ navigation }) {
       return setErro('A senha deve ter pelo menos 6 caracteres.');
     }
 
-    createUserWithEmailAndPassword(auth, email, senha)
+    createUserWithEmailAndPassword(auth, email, senha, nome)
       .then(() => {
         Alert.alert('Sucesso', 'Conta criada!');
         navigation.replace('TelaPrincipal');
@@ -100,11 +112,11 @@ function Cadastro({ navigation }) {
       <View>
         <Text>Criar Conta</Text>
         <Text>Preencha os dados para se cadastrar.</Text>
+        <TextInput placeholder='Nome completo' value={nome} onChangeText={setNome} autoCapitalize='none' secureTextEntry></TextInput>
         <TextInput placeholder='Email' value={email} onChangeText={setEmail} autoCapitalize='none'></TextInput>
         <TextInput placeholder='Senha' value={senha} onChangeText={setSenha} autoCapitalize='none' secureTextEntry></TextInput>
-        <TextInput placeholder='Senha' value={senha} onChangeText={setSenha} autoCapitalize='none' secureTextEntry></TextInput>
-        <TextInput placeholder='Senha' value={senha} onChangeText={setSenha} autoCapitalize='none' secureTextEntry></TextInput>
-        <TouchableOpacity style={styles.button} onPress={login}><Text style={styles.buttonText}>Entrar</Text></TouchableOpacity>
+        <TextInput placeholder='Confirmar Senha' value={confsenha} onChangeText={setConfSenha} autoCapitalize='none' secureTextEntry></TextInput>
+        <TouchableOpacity style={styles.button} onPress={cadastrar}><Text style={styles.buttonText}>Entrar</Text></TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -113,6 +125,7 @@ function Cadastro({ navigation }) {
 function TelaPrincipal({ navigation }) {
   const [countries, setCountries] = useState([]);
   const [search, setSearch] = useState('');
+  const [favoritos, setFavoritos] = useState([]);
 
   useEffect(() => {
     loadCountries();
@@ -135,7 +148,7 @@ function TelaPrincipal({ navigation }) {
   function openCountryDetails(country) {
     console.log(country);
 
-    navigation.navigate("Detalhes", { country });
+    navigation.navigate("Detalhes", { country, favoritos, setFavoritos });
   }
 
   function renderItem({ item }) {
@@ -191,7 +204,9 @@ function TelaPrincipal({ navigation }) {
         <TouchableOpacity onPress={() => navigation.navigate('TelaPrincipal')}>
           <Text>🏠 Início</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate('Favoritos')}
+        <TouchableOpacity onPress={() => navigation.navigate('Favoritos', {
+          favoritos
+        })}
         ><Text>🤍 Favoritos</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Perfil')}>
@@ -203,7 +218,23 @@ function TelaPrincipal({ navigation }) {
 }
 
 function Detalhes({ route }) {
-  const { country } = route.params;
+  const { country, favoritos, setFavoritos } = route.params;
+
+  function adicionarFavorito() {
+
+    const existe = favoritos.find(
+      item => item.name.common == country.name.common
+    );
+
+    if (existe) {
+      Alert.alert('Esse país já está nos favoritos')
+      return;
+    }
+
+    setFavoritos([...favoritos, country]);
+
+    Alert.alert('Adicionado aos favoritos');
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
@@ -280,6 +311,7 @@ function Detalhes({ route }) {
             borderRadius: 12,
             alignItems: 'center',
           }}
+          onPress={adicionarFavorito}
         >
           <Text
             style={{
@@ -299,10 +331,109 @@ function Detalhes({ route }) {
 
 function Perfil({ navigation }) {
 
+  const [foto, setFoto] = useState(null);
+  const user = auth.currentUser;
+
+  return (
+    <View>
+
+      <Image
+        source={
+          foto
+            ? { uri: foto }
+            : { uri: "https://upload.wikimedia.org/wikipedia/en/8/80/SakuraKishimoto.jpg"}
+          }
+      style={{ width: 100, height: 100, borderRadius: 50 }}
+      />
+
+      <Text>Email: {user?.email}</Text>
+      <Text>Favoritos</Text>
+      <Text>Países visitados</Text>
+      <Text>Resenhas</Text>
+
+      <TouchableOpacity onPress={() => navigation.navigate('')}>
+        <Text>Editar Perfil</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => navigation.navigate('AlterarFoto')}>
+        <Text>Alterar foto</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => navigation.navigate('')}>
+        <Text>Alterar senha</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => navigation.navigate('')}>
+        <Text>Sair</Text>
+      </TouchableOpacity>
+
+
+      <View style={styles.bottomBar}>
+
+        <TouchableOpacity onPress={() => navigation.navigate('TelaPrincipal')}>
+          <Text>🏠 Início</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate('Favoritos')}>
+          <Text>🤍 Favoritos</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate('Perfil')}>
+          <Text>👤 Perfil</Text>
+        </TouchableOpacity>
+
+      </View>
+
+    </View>
+  );
 }
 
-function Favoritos({ navigation }) {
+function Favoritos({ navigation, route }) {
+  const { favoritos } = route.params;
 
+  return (
+    <View style={{ flex: 1 }}>
+
+      <FlatList
+        data={favoritos}
+        keyExtractor={(item) => item.name.common}
+        renderItem={({ item }) => (
+          <View style={styles.card}>
+
+            <Image
+              source={{ uri: item.flags.png }}
+              style={styles.flag}
+            />
+
+            <View>
+              <Text style={styles.country}>
+                {item.name.common}
+              </Text>
+
+              <Text style={styles.capital}>
+                Capital: {item.capital?.[0]}
+              </Text>
+            </View>
+
+          </View>
+        )}
+      />
+
+      <View style={styles.bottomBar}>
+
+        <TouchableOpacity onPress={() => navigation.navigate('TelaPrincipal')}>
+          <Text>🏠 Início</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity>
+          <Text>🤍 Favoritos</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate('Perfil')}>
+          <Text>👤 Perfil</Text>
+        </TouchableOpacity>
+
+      </View>
+
+    </View>
+  );
 }
 
 function AlterarFoto({ navigation }) {
@@ -319,6 +450,10 @@ function AlterarFoto({ navigation }) {
       </View>
     </SafeAreaView>
   );
+}
+
+function AlterarSenha({ navigation }){
+
 }
 
 const styles = StyleSheet.create({
