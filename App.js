@@ -33,7 +33,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// ─── Helpers Firestore ────────────────────────────────────────────────────────
+// Helpers 
 
 async function getFavoritos() {
   const db = getFirestore(app);
@@ -61,7 +61,6 @@ async function alterarSenha(novaSenha) {
   }
 }
 
-// ─── BottomBar ────────────────────────────────────────────────────────────────
 
 function BottomBar({ navigation, active }) {
   const tabs = [
@@ -95,8 +94,6 @@ function BottomBar({ navigation, active }) {
   );
 }
 
-// ─── App ──────────────────────────────────────────────────────────────────────
-
 function App() {
   return (
     <View style={styles.webContainer}>
@@ -117,8 +114,6 @@ function App() {
     </View>
   );
 }
-
-// ─── Login ────────────────────────────────────────────────────────────────────
 
 function Login({ navigation }) {
   const [email, setEmail] = useState('');
@@ -150,8 +145,6 @@ function Login({ navigation }) {
     </SafeAreaView>
   );
 }
-
-// ─── Cadastro ─────────────────────────────────────────────────────────────────
 
 function Cadastro({ navigation }) {
   const [email, setEmail] = useState('');
@@ -190,8 +183,6 @@ function Cadastro({ navigation }) {
     </SafeAreaView>
   );
 }
-
-// ─── Tela Principal ───────────────────────────────────────────────────────────
 
 function TelaPrincipal({ navigation }) {
   const [countries, setCountries] = useState([]);
@@ -244,8 +235,6 @@ function TelaPrincipal({ navigation }) {
     </View>
   );
 }
-
-// ─── Detalhes ─────────────────────────────────────────────────────────────────
 
 function Detalhes({ route }) {
   const { country } = route.params;
@@ -318,8 +307,6 @@ function Detalhes({ route }) {
   );
 }
 
-// ─── Perfil ───────────────────────────────────────────────────────────────────
-
 function Perfil({ navigation }) {
   const [foto, setFoto] = useState(null);
   const user = auth.currentUser;
@@ -342,7 +329,6 @@ function Perfil({ navigation }) {
 
   return (
     <View style={{ flex: 1 }}>
-      {/* Conteúdo cresce e empurra a barra para baixo */}
       <View style={{ flex: 1, padding: 20 }}>
         <Image
           source={foto
@@ -366,8 +352,6 @@ function Perfil({ navigation }) {
     </View>
   );
 }
-
-// ─── Favoritos ────────────────────────────────────────────────────────────────
 
 function Favoritos({ navigation }) {
   const [favoritos, setFavoritos] = useState([]);
@@ -425,8 +409,6 @@ function Favoritos({ navigation }) {
     </View>
   );
 }
-
-// ─── Alterar Foto ─────────────────────────────────────────────────────────────
 
 function AlterarFoto({ navigation }) {
   const [imagem, setImagem] = useState(null);
@@ -501,8 +483,6 @@ function AlterarFoto({ navigation }) {
   );
 }
 
-// ─── Alterar Senha ────────────────────────────────────────────────────────────
-
 function AlterarSenha({ navigation }) {
   const [novaSenha, setNovaSenha] = useState('');
   const [confirmar, setConfirmar] = useState('');
@@ -561,8 +541,6 @@ function AlterarSenha({ navigation }) {
     </SafeAreaView>
   );
 }
-
-// ─── Estilos ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   webContainer: { flex: 1 },
@@ -641,7 +619,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   input: {
-    backgroundColor: '#f0f0f0', // ← BUG CORRIGIDO: aspas faltando no original
+    backgroundColor: '#f0f0f0', 
     padding: 15,
     borderRadius: 10,
     marginTop: 10,
